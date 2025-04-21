@@ -37,8 +37,8 @@ jobs:
           aws-region: ${{ inputs.ecr_region }}
 
       - name: Terraform Create ECR repository
-        run: |
-          cd ECR/
+        working-directory: ./ECR
+        run: |  
           terraform init
           terraform plan -var="aws_access_key_id=${{ secrets.aws_access_key_id }}" \
                          -var="aws_secret_access_key=${{ secrets.aws_secret_access_key }}" \
