@@ -1,0 +1,46 @@
+name: Reusable workflow to create ECR repository
+
+on:
+  workflow_call:
+    inputs:
+      ecr_region:
+        required: true
+        type: string
+        description: The AWS region where the ECR repository will be created
+
+      ecr_repo_name:
+        required: true
+        type: string
+        description: The name of the ECR repository to create
+
+    secrets:
+      aws_access_key_id:
+        required: true
+        description: The AWS access key ID
+
+      aws_secret_access_key:
+        required: true
+        description: The AWS secret access key
+
+jobs:
+  create_ecr_repository:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.aws_access_key_id }}
+          aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
+          aws-region: ${{ inputs.ecr_region }}
+
+      - name: Terraform Create ECR repository
+        run: |
+          cd ECR/
+          terraform init
+          terraform plan -var="aws_access_key_id=${{ secrets.aws_access_key_id }}" \
+                         -var="aws_secret_access_key=${{ secrets.aws_secret_access_key }}" \
+                         -var="ecr_repo_name=${{ inputs.ecr_repo_name }}" \
+                         -var="ecr_region=${{ inputs.ecr_region }}"
